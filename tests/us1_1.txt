@@ -1,5 +1,5 @@
 # User Story 1 - Criação de contas
-# Permita a um usuário criar uma conta no MyFood, O usuário poderá ser de dois tipos, Cliente e Dono de Empresa.
+# Permita a um usuário criar uma conta no MyFood, O usuário poderá ser de dois tipos, br.ufal.ic.myfood.models.Cliente e Dono de Empresa.
 #
 # Os dados gerais para os usuários são:
 # id -> Que deve ser do tipo int e único gerado pelo sistema.
@@ -45,7 +45,7 @@
 # Apaga toda a base de dados.
 zerarSistema
 
-expectError "Usuario nao cadastrado." getAtributoUsuario id=9999 atributo="nome"
+expectError "br.ufal.ic.myfood.models.Usuario nao cadastrado." getAtributoUsuario id=9999 atributo="nome"
 
 criarUsuario nome="Carlos" email="carlos@ufal.com.br" senha="123senha" endereco="Rua Exemplo N 123"
 

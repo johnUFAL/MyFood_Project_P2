@@ -1,3 +1,5 @@
+package br.ufal.ic.myfood.models;
+
 public abstract class Usuario {
     private int id;
     private String nome;
@@ -11,6 +13,7 @@ public abstract class Usuario {
         this.id = id;
         this.nome = nome;
         this.email = email;
+        this.senha = senha;
         this.endereco = endereco;
     }
 

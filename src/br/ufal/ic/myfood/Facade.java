@@ -1,3 +1,7 @@
+package br.ufal.ic.myfood;
+
+import br.ufal.ic.myfood.controllers.ControladorDeUsuarios;
+
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;

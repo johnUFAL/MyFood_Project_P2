@@ -1,3 +1,5 @@
+package br.ufal.ic.myfood.models;
+
 public class DonoEmpresa extends Usuario {
     private String cpf;
 

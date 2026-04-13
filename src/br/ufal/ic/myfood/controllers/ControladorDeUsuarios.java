@@ -1,3 +1,8 @@
+package br.ufal.ic.myfood.controllers;
+import br.ufal.ic.myfood.models.Usuario;
+import br.ufal.ic.myfood.models.DonoEmpresa;
+import br.ufal.ic.myfood.models.Cliente;
+
 import java.util.Map;
 import  java.util.HashMap;
 
@@ -32,8 +37,8 @@ public class ControladorDeUsuarios {
 
     public void criarDono(String nome, String email, String senha, String endereco, String cpf) throws Exception {
         validarDadosBase(nome, email, senha, endereco);
-        verificarEmailExistente(email);
         validarCpf(cpf);
+        verificarEmailExistente(email);
         int id = gerarId();
         DonoEmpresa dono = new DonoEmpresa(id, nome, email, senha, endereco, cpf);
         this.usuarios.put(id, dono);
@@ -41,10 +46,10 @@ public class ControladorDeUsuarios {
 
     public int login(String email, String senha) throws Exception {
         if (email == null || email.trim().isEmpty() || senha == null || senha.trim().isEmpty()) {
-            throw new Exception("Login ou senha invalidos.");
+            throw new Exception("Login ou senha invalidos");
         }
         for (Usuario u : usuarios.values()) {
-            if (u.getEmail().equals(email) && u.getSenha().equals(senha)) {
+            if (email.equals(u.getEmail()) && senha.equals(u.getSenha())) {
                 return u.getId();
             }
         }
@@ -70,7 +75,7 @@ public class ControladorDeUsuarios {
 
     private Usuario buscarUsuarioPorId(int id) throws Exception {
         if (!this.usuarios.containsKey(id)) {
-            throw new Exception("Usuario nao cadastrado.");
+            throw new Exception("br.ufal.ic.myfood.models.Usuario nao cadastrado.");
         }
         return this.usuarios.get(id);
     }
