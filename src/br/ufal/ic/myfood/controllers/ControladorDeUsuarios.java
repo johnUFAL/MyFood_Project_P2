@@ -1,10 +1,12 @@
 package br.ufal.ic.myfood.controllers;
+import br.ufal.ic.myfood.exceptions.*;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Cliente;
 
 import java.util.Map;
 import  java.util.HashMap;
+
 
 public class ControladorDeUsuarios {
     private  Map<Integer, Usuario> usuarios;
@@ -46,14 +48,14 @@ public class ControladorDeUsuarios {
 
     public int login(String email, String senha) throws Exception {
         if (email == null || email.trim().isEmpty() || senha == null || senha.trim().isEmpty()) {
-            throw new Exception("Login ou senha invalidos");
+            throw new LoginSenhaException();
         }
         for (Usuario u : usuarios.values()) {
             if (email.equals(u.getEmail()) && senha.equals(u.getSenha())) {
                 return u.getId();
             }
         }
-        throw new Exception("Login ou senha invalidos");
+        throw new LoginSenhaException();
     }
 
     public String getAtributoUsuario(int id, String atributo) throws Exception {
@@ -67,34 +69,34 @@ public class ControladorDeUsuarios {
                 if (u instanceof DonoEmpresa) {
                     return ((DonoEmpresa) u).getCpf();
                 }
-                throw new Exception("Atributo nao existe");
+                throw new AtributoNaoExiste();
             }
-            default: throw  new Exception("Atributo invalido");
+            default: throw  new AtributoInvalido();
         }
     }
 
     private Usuario buscarUsuarioPorId(int id) throws Exception {
         if (!this.usuarios.containsKey(id)) {
-            throw new Exception("br.ufal.ic.myfood.models.Usuario nao cadastrado.");
+            throw new UsuarioNaoCadastrado();
         }
         return this.usuarios.get(id);
     }
 
     private void validarDadosBase(String nome, String email, String senha, String endereco) throws Exception {
-        if (nome == null || nome.trim().isEmpty()) throw new Exception("Nome invalido");
-        if (email == null || email.trim().isEmpty() || !email.contains("@")) throw new Exception("Email invalido");
-        if (senha == null || senha.trim().isEmpty()) throw new Exception("Senha invalido");
-        if (endereco == null || endereco.trim().isEmpty()) throw new Exception("Endereco invalido");
+        if (nome == null || nome.trim().isEmpty()) throw new NomeInvalido();
+        if (email == null || email.trim().isEmpty() || !email.contains("@")) throw new EmailInvalido();
+        if (senha == null || senha.trim().isEmpty()) throw new SenhaInvalida();
+        if (endereco == null || endereco.trim().isEmpty()) throw new EnderecoInvalido();
     }
 
     private void validarCpf(String cpf) throws Exception {
-        if (cpf == null || cpf.length() != 14) throw new Exception("CPF invalido");
+        if (cpf == null || cpf.length() != 14) throw new CpfInvalido();
     }
 
     private void verificarEmailExistente(String email) throws Exception {
         for (Usuario u : usuarios.values()) {
             if (u.getEmail().equals(email)) {
-                throw new Exception("Conta com esse email ja existe");
+                throw new ContaEmailEmUso();
             }
         }
     }
