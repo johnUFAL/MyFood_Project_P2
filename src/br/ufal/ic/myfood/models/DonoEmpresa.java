@@ -10,7 +10,7 @@ public class DonoEmpresa extends Usuario {
         this.cpf = cpf;
     }
 
-    public  String getCpf() {return cpf;}
+    public String getCpf() {return cpf;}
 
     public void setCpf(String cpf) {this.cpf = cpf;}
 

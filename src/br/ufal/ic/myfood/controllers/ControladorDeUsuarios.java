@@ -1,11 +1,11 @@
 package br.ufal.ic.myfood.controllers;
-import br.ufal.ic.myfood.exceptions.*;
+import br.ufal.ic.myfood.exceptions.Users.*;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Cliente;
 
 import java.util.Map;
-import  java.util.HashMap;
+import java.util.HashMap;
 
 
 public class ControladorDeUsuarios {
@@ -18,8 +18,9 @@ public class ControladorDeUsuarios {
     }
 
     public Map<Integer, Usuario> getUsuarios() {return usuarios;}
-    public int getProximoId() {return proximoId;}
+    public void setUsuarios(Map<Integer, Usuario> usuarios) {this.usuarios = usuarios;}
 
+    public int getProximoId() {return proximoId;}
     public void setProximoId(int proximoId) {this.proximoId = proximoId;}
 
     public void zerar() {
@@ -75,7 +76,7 @@ public class ControladorDeUsuarios {
         }
     }
 
-    private Usuario buscarUsuarioPorId(int id) throws Exception {
+    public Usuario buscarUsuarioPorId(int id) throws Exception {
         if (!this.usuarios.containsKey(id)) {
             throw new UsuarioNaoCadastrado();
         }
