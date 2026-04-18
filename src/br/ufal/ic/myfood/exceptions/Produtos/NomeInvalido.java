@@ -1,4 +1,4 @@
-package br.ufal.ic.myfood.exceptions.Users;
+package br.ufal.ic.myfood.exceptions.Produtos;
 
 public class NomeInvalido extends Exception{
     public NomeInvalido() {

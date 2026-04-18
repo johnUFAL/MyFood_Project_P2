@@ -1,11 +1,11 @@
 package br.ufal.ic.myfood.controllers;
-import br.ufal.ic.myfood.exceptions.Users.*;
+import br.ufal.ic.myfood.exceptions.Usuarios.*;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Cliente;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 
 public class ControladorDeUsuarios {
@@ -13,7 +13,7 @@ public class ControladorDeUsuarios {
     private int proximoId;
 
     public ControladorDeUsuarios() {
-        this.usuarios = new HashMap<>();
+        this.usuarios = new LinkedHashMap<>();
         this.proximoId = 1;
     }
 

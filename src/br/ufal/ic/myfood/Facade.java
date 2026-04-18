@@ -2,14 +2,17 @@ package br.ufal.ic.myfood;
 
 import br.ufal.ic.myfood.controllers.ControladorDeUsuarios;
 import br.ufal.ic.myfood.controllers.ControladorDeEmpresa;
-import br.ufal.ic.myfood.exceptions.Empresas.UsuarioNaoCriaEmpresa;
-import br.ufal.ic.myfood.exceptions.Users.AtributoInvalido;
+import br.ufal.ic.myfood.controllers.ControladorDeProduto;
+import br.ufal.ic.myfood.exceptions.Empresas.*;
+import br.ufal.ic.myfood.exceptions.Empresas.AtributoInvalido;
+import br.ufal.ic.myfood.exceptions.Produtos.AtributoNaoExiste;
+import br.ufal.ic.myfood.exceptions.Usuarios.*;
+import br.ufal.ic.myfood.exceptions.Produtos.*;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Empresa;
 import br.ufal.ic.myfood.models.Restaurante;
 import br.ufal.ic.myfood.models.Usuario;
-import br.ufal.ic.myfood.exceptions.Users.*;
-import br.ufal.ic.myfood.exceptions.Empresas.*;
+import br.ufal.ic.myfood.models.Produto;
 
 
 import java.beans.XMLDecoder;
@@ -23,6 +26,7 @@ public class Facade {
 
     private ControladorDeUsuarios controladorUsuarios;
     private ControladorDeEmpresa controladorDeEmpresa;
+    private ControladorDeProduto controladorDeProduto;
 
     public Facade() {
         carregarDados();
@@ -31,6 +35,7 @@ public class Facade {
     public void zerarSistema() {
         this.controladorUsuarios.zerar();
         this.controladorDeEmpresa.zerar();
+        this.controladorDeProduto.zerar();
     }
 
     public void encerrarSistema() {
@@ -50,6 +55,10 @@ public class Facade {
         return this.controladorDeEmpresa.criarEmpresa(tipoEmpresa, usuario, nome, endereco, tipoCozinha);
     }
 
+    public int criarProduto(int empresa, String nome, float valor, String categoria) throws Exception {
+        return this.controladorDeProduto.criarProduto(empresa, nome, valor, categoria);
+    }
+
     public int login(String email, String senha) throws Exception {
         return this.controladorUsuarios.login(email, senha);
     }
@@ -65,6 +74,10 @@ public class Facade {
             throw new UsuarioNaoCriaEmpresa();
         }
         return this.controladorDeEmpresa.getEmpresasDoUsuario(idDono);
+    }
+
+    public void editarProduto(int produto, String nome, float valor, String categoria) throws Exception {
+        this.controladorDeProduto.editarProduto(produto, nome, valor, categoria);
     }
 
     public int getIdEmpresa(int idDono, String nome, int indice) throws Exception {
@@ -95,10 +108,35 @@ public class Facade {
         }
     }
 
+    public String getProduto(String nome, int empresa, String atributo) throws Exception {
+        Produto p = this.controladorDeProduto.buscarProdutoPorNomeEEmpresa(nome, empresa);
+
+        switch (atributo) {
+            case "valor":
+                return String.format(java.util.Locale.US, "%.2f", p.getValor());
+            case "categoria":
+                return p.getCategoria();
+            case "empresa":
+                return this.controladorDeEmpresa.buscarEmpresaPorId(empresa).getNome();
+            default:
+                throw new AtributoNaoExiste();
+        }
+    }
+
+    public String listarProdutos(int empresa) throws Exception {
+        try {
+            this.controladorDeEmpresa.buscarEmpresaPorId(empresa);
+        } catch (Exception e) {
+            throw new EmpresaNaoEncontrada();
+        }
+        return this.controladorDeProduto.listarProdutos(empresa);
+    }
+
     private void salvarDados() {
         try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("banco_myfood.xml")))) {
             encoder.writeObject(this.controladorUsuarios);
-            encoder.writeObject((this.controladorDeEmpresa));
+            encoder.writeObject(this.controladorDeEmpresa);
+            encoder.writeObject(this.controladorDeProduto);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -108,9 +146,11 @@ public class Facade {
         try (XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("banco_myfood.xml")))) {
             this.controladorUsuarios = (ControladorDeUsuarios) decoder.readObject();
             this.controladorDeEmpresa = (ControladorDeEmpresa) decoder.readObject();
+            this.controladorDeProduto = (ControladorDeProduto) decoder.readObject();
         } catch (Exception e) {
             this.controladorUsuarios = new ControladorDeUsuarios();
             this.controladorDeEmpresa = new ControladorDeEmpresa();
+            this.controladorDeProduto = new ControladorDeProduto();
         }
     }
 }

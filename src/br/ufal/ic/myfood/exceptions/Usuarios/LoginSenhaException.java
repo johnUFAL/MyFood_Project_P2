@@ -1,4 +1,4 @@
-package br.ufal.ic.myfood.exceptions.Users;
+package br.ufal.ic.myfood.exceptions.Usuarios;
 
 public class LoginSenhaException extends Exception {
     public LoginSenhaException() {
