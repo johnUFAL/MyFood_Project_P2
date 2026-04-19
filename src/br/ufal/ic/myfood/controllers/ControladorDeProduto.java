@@ -83,6 +83,13 @@ public class ControladorDeProduto {
         return resultado.toString();
     }
 
+    public Produto buscarProdutoPorId(int id) throws Exception {
+        if (!this.produto.containsKey(id)) {
+            throw new ProdutoNaoCadastrado();
+        }
+        return this.produto.get(id);
+    }
+
     private void validarDadosBase(String nome, float valor, String categoria) throws Exception {
         if (nome == null || nome.trim().isEmpty()) throw new NomeInvalido();
         if (valor < 0) throw new ValorInvalido();
