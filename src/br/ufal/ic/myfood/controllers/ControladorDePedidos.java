@@ -1,6 +1,7 @@
 package br.ufal.ic.myfood.controllers;
 
 import br.ufal.ic.myfood.exceptions.Pedidos.*;
+import br.ufal.ic.myfood.exceptions.Produtos.*;
 import br.ufal.ic.myfood.models.Pedido;
 
 import java.util.Map;

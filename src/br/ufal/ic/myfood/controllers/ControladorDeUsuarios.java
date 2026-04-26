@@ -1,4 +1,5 @@
 package br.ufal.ic.myfood.controllers;
+import br.ufal.ic.myfood.exceptions.*;
 import br.ufal.ic.myfood.exceptions.Usuarios.*;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.DonoEmpresa;

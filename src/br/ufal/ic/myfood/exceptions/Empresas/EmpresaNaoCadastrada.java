@@ -4,5 +4,4 @@ public class EmpresaNaoCadastrada extends Exception{
     public EmpresaNaoCadastrada() {
         super("Empresa nao cadastrada");
     }
-    public EmpresaNaoCadastrada(String message) {super(message);}
 }

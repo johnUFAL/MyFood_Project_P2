@@ -1,22 +1,21 @@
 package br.ufal.ic.myfood;
 
+
 import br.ufal.ic.myfood.controllers.ControladorDeUsuarios;
 import br.ufal.ic.myfood.controllers.ControladorDeEmpresa;
 import br.ufal.ic.myfood.controllers.ControladorDeProduto;
 import br.ufal.ic.myfood.controllers.ControladorDePedidos;
-import br.ufal.ic.myfood.exceptions.Empresas.*;
-import br.ufal.ic.myfood.exceptions.Empresas.AtributoInvalido;
-import br.ufal.ic.myfood.exceptions.Pedidos.ProdutoNaoEncontrado;
-import br.ufal.ic.myfood.exceptions.Produtos.AtributoNaoExiste;
-import br.ufal.ic.myfood.exceptions.Usuarios.*;
+import br.ufal.ic.myfood.exceptions.*;
 import br.ufal.ic.myfood.exceptions.Produtos.*;
 import br.ufal.ic.myfood.exceptions.Pedidos.*;
+import br.ufal.ic.myfood.exceptions.Empresas.*;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Empresa;
 import br.ufal.ic.myfood.models.Restaurante;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.Produto;
 import br.ufal.ic.myfood.models.Pedido;
+import  br.ufal.ic.myfood.models.Mercado;
 
 
 import java.beans.XMLDecoder;
@@ -25,6 +24,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 
 public class Facade {
 
@@ -59,6 +59,11 @@ public class Facade {
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) throws Exception {
         Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
         return this.controladorDeEmpresa.criarEmpresa(tipoEmpresa, usuario, nome, endereco, tipoCozinha);
+    }
+
+    public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String abre, String fecha, String tipoMercado) throws Exception {
+        Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
+        return this.controladorDeEmpresa.criarMercado(tipoEmpresa, usuario, nome, endereco, abre, fecha, tipoMercado);
     }
 
     public int criarProduto(int empresa, String nome, float valor, String categoria) throws Exception {
@@ -118,6 +123,15 @@ public class Facade {
                 throw new AtributoInvalido();
             case "dono":
                 return this.controladorUsuarios.buscarUsuarioPorId(e.getDono()).getNome();
+            case "abre":
+                if (e instanceof Mercado) return ((Mercado) e).getAbre();
+                throw new AtributoInvalido();
+            case "fecha":
+                if (e instanceof Mercado) return ((Mercado) e).getFecha();
+                throw new AtributoInvalido();
+            case "tipoMercado":
+                if (e instanceof Mercado) return ((Mercado) e).getTipoMercado();
+                throw new AtributoInvalido();
             default:
                 throw new AtributoInvalido();
         }
@@ -216,6 +230,10 @@ public class Facade {
             default:
                 throw new AtributoNaoExiste();
         }
+    }
+
+    public void alterarFuncionamento(int mercado, String abre, String fecha) throws Exception {
+        this.controladorDeEmpresa.alterarFuncionamento(mercado, abre, fecha);
     }
 
     private void salvarDados() {

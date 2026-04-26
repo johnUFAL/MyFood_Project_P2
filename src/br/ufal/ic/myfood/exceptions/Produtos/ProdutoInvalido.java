@@ -1,4 +1,4 @@
-package br.ufal.ic.myfood.exceptions.Pedidos;
+package br.ufal.ic.myfood.exceptions.Produtos;
 
 public class ProdutoInvalido extends Exception {
     public ProdutoInvalido() {
