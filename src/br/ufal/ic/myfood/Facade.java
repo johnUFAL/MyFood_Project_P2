@@ -15,7 +15,8 @@ import br.ufal.ic.myfood.models.Restaurante;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.Produto;
 import br.ufal.ic.myfood.models.Pedido;
-import  br.ufal.ic.myfood.models.Mercado;
+import br.ufal.ic.myfood.models.Mercado;
+import br.ufal.ic.myfood.models.Farmacia;
 
 
 import java.beans.XMLDecoder;
@@ -64,6 +65,11 @@ public class Facade {
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String abre, String fecha, String tipoMercado) throws Exception {
         Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
         return this.controladorDeEmpresa.criarMercado(tipoEmpresa, usuario, nome, endereco, abre, fecha, tipoMercado);
+    }
+
+    public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws Exception{
+        Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
+        return this.controladorDeEmpresa.criarFarmacia(tipoEmpresa, usuario, nome, endereco, aberto24Horas, numeroFuncionarios);
     }
 
     public int criarProduto(int empresa, String nome, float valor, String categoria) throws Exception {
@@ -131,6 +137,12 @@ public class Facade {
                 throw new AtributoInvalido();
             case "tipoMercado":
                 if (e instanceof Mercado) return ((Mercado) e).getTipoMercado();
+                throw new AtributoInvalido();
+            case "aberto24Horas":
+                if (e instanceof Farmacia) return String.valueOf(((Farmacia) e).getAberto24Horas());
+                throw new AtributoInvalido();
+            case "numeroFuncionarios":
+                if (e instanceof Farmacia) return String.valueOf(((Farmacia) e).getNumeroFuncionarios());
                 throw new AtributoInvalido();
             default:
                 throw new AtributoInvalido();

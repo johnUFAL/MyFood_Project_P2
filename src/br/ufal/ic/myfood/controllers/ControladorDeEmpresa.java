@@ -2,11 +2,7 @@ package br.ufal.ic.myfood.controllers;
 
 import br.ufal.ic.myfood.exceptions.Empresas.*;
 import br.ufal.ic.myfood.exceptions.Empresas.Mercado.*;
-import br.ufal.ic.myfood.models.DonoEmpresa;
-import br.ufal.ic.myfood.models.Empresa;
-import br.ufal.ic.myfood.models.Restaurante;
-import br.ufal.ic.myfood.models.Mercado;
-import br.ufal.ic.myfood.models.Usuario;
+import br.ufal.ic.myfood.models.*;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -171,6 +167,19 @@ public class ControladorDeEmpresa {
         int id = gerarId();
         Mercado mercado = new Mercado(id, dono.getId(), nome, endereco, abre, fecha, tipoMercado);
         this.empresa.put(id, mercado);
+        return id;
+    }
+
+    public int criarFarmacia(String tipoEmpresa, Usuario dono, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws Exception {
+        if (tipoEmpresa == null || !tipoEmpresa.equals("farmacia")) {
+            throw new TipoEmpresaInvalido();
+        }
+
+        validarCriacaoEmpresaBase(dono, nome, endereco);
+
+        int id = gerarId();
+        Farmacia farmacia = new Farmacia(id, dono.getId(), nome, endereco, aberto24Horas, numeroFuncionarios);
+        this.empresa.put(id, farmacia);
         return id;
     }
 
