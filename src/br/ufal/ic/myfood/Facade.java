@@ -9,8 +9,10 @@ import br.ufal.ic.myfood.exceptions.*;
 import br.ufal.ic.myfood.exceptions.Produtos.*;
 import br.ufal.ic.myfood.exceptions.Pedidos.*;
 import br.ufal.ic.myfood.exceptions.Empresas.*;
+import br.ufal.ic.myfood.exceptions.Usuarios.Entregador.UsuarioNaoEntregador;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Empresa;
+import br.ufal.ic.myfood.models.Entregador;
 import br.ufal.ic.myfood.models.Restaurante;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.Produto;
@@ -25,6 +27,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.List;
 
 
 public class Facade {
@@ -57,6 +60,10 @@ public class Facade {
         this.controladorUsuarios.criarDono(nome, email, senha, endereco, cpf);
     }
 
+    public void criarUsuario(String nome, String email, String senha, String endereco, String veiculo, String placa) throws Exception {
+        this.controladorUsuarios.criarEntregador(nome, email, senha, endereco, veiculo, placa);
+    }
+
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) throws Exception {
         Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
         return this.controladorDeEmpresa.criarEmpresa(tipoEmpresa, usuario, nome, endereco, tipoCozinha);
@@ -87,6 +94,21 @@ public class Facade {
 
     public int login(String email, String senha) throws Exception {
         return this.controladorUsuarios.login(email, senha);
+    }
+
+    public void cadastrarEntregador(int idEmpresa, int idEntregador) throws Exception {
+        Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idEntregador);
+
+        if (!(u instanceof Entregador)) {
+            throw new UsuarioNaoEntregador();
+        }
+
+        this.controladorDeEmpresa.buscarEmpresaPorId(idEmpresa);
+
+        Entregador ent = (Entregador) u;
+        if (!ent.getEmpresas().contains(idEmpresa)) {
+            ent.getEmpresas().add(idEmpresa);
+        }
     }
 
     public String getAtributoUsuario(int id, String atributo) throws Exception {
@@ -162,6 +184,47 @@ public class Facade {
             default:
                 throw new AtributoNaoExiste();
         }
+    }
+
+    public String getEntregadores(int idEmpresa) throws Exception {
+        this.controladorDeEmpresa.buscarEmpresaPorId(idEmpresa);
+
+        StringBuilder sb = new StringBuilder("{[");
+        boolean primeiro = true;
+
+        for (Usuario u : this.controladorUsuarios.getUsuarios().values()) {
+            if (u instanceof Entregador) {
+                Entregador ent = (Entregador) u;
+                if (ent.getEmpresas().contains(idEmpresa)) {
+                    if(!primeiro) sb.append(", ");
+                    sb.append(ent.getEmail());
+                    primeiro = false;
+                }
+            }
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    public String getEmpresas(int idEntregador) throws Exception {
+        Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idEntregador);
+
+        if (!(u instanceof  Entregador)) {
+            throw new UsuarioNaoEntregador();
+        }
+
+        Entregador ent = (Entregador) u;
+        StringBuilder sb = new StringBuilder("{[");
+        boolean primeiro = true;
+
+        for (Integer idEmp : ent.getEmpresas()) {
+            Empresa emp = this.controladorDeEmpresa.buscarEmpresaPorId(idEmp);
+            if (!primeiro) sb.append(", ");
+            sb.append("[").append(emp.getNome()).append(", ").append(emp.getEndereco()).append("]");
+            primeiro = false;
+        }
+        sb.append("]}");
+        return sb.toString();
     }
 
     public String listarProdutos(int empresa) throws Exception {

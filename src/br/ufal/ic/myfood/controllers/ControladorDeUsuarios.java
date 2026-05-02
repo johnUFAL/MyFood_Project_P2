@@ -1,12 +1,19 @@
 package br.ufal.ic.myfood.controllers;
+
+
 import br.ufal.ic.myfood.exceptions.*;
 import br.ufal.ic.myfood.exceptions.Usuarios.*;
+import br.ufal.ic.myfood.exceptions.Usuarios.Entregador.placaInvalido;
+import br.ufal.ic.myfood.exceptions.Usuarios.Entregador.veiculoInvalido;
 import br.ufal.ic.myfood.models.Usuario;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Cliente;
+import br.ufal.ic.myfood.models.Entregador;
+
 
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 
 public class ControladorDeUsuarios {
@@ -48,6 +55,25 @@ public class ControladorDeUsuarios {
         this.usuarios.put(id, dono);
     }
 
+    public void criarEntregador(String nome, String email, String senha, String endereco, String veiculo, String placa) throws Exception {
+        validarDadosBase(nome, email, senha, endereco);
+
+        if (veiculo == null || veiculo.trim().isEmpty()) throw new veiculoInvalido();
+        if (placa == null || placa.trim().isEmpty()) throw new placaInvalido();
+
+        for (Usuario u : usuarios.values()) {
+            if (u instanceof Entregador && ((Entregador) u).getPlaca().equals(placa)) {
+                throw new placaInvalido();
+            }
+        }
+
+        verificarEmailExistente(email);
+
+        int id = gerarId();
+        Entregador entregador = new Entregador(id, nome, email, senha, endereco, veiculo, placa);
+        this.usuarios.put(id, entregador);
+    }
+
     public int login(String email, String senha) throws Exception {
         if (email == null || email.trim().isEmpty() || senha == null || senha.trim().isEmpty()) {
             throw new LoginSenhaException();
@@ -73,6 +99,16 @@ public class ControladorDeUsuarios {
                 }
                 throw new AtributoNaoExiste();
             }
+            case "placa":
+                if (u instanceof Entregador) {
+                    return ((Entregador) u).getPlaca();
+                }
+                throw new AtributoNaoExiste();
+            case "veiculo":
+                if (u instanceof Entregador) {
+                    return ((Entregador) u).getVeiculo();
+                }
+                throw new AtributoNaoExiste();
             default: throw  new AtributoInvalido();
         }
     }

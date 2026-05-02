@@ -1,4 +1,4 @@
-package br.ufal.ic.myfood.exceptions.Empresas.Mercado;
+package br.ufal.ic.myfood.exceptions.Empresas;
 
 public class TipoEmpresaInvalido extends Exception{
     public TipoEmpresaInvalido(){
