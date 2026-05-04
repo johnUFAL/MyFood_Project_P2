@@ -5,10 +5,13 @@ import br.ufal.ic.myfood.controllers.ControladorDeUsuarios;
 import br.ufal.ic.myfood.controllers.ControladorDeEmpresa;
 import br.ufal.ic.myfood.controllers.ControladorDeProduto;
 import br.ufal.ic.myfood.controllers.ControladorDePedidos;
+import br.ufal.ic.myfood.controllers.ControladorDeEntregas;
 import br.ufal.ic.myfood.exceptions.*;
 import br.ufal.ic.myfood.exceptions.Produtos.*;
 import br.ufal.ic.myfood.exceptions.Pedidos.*;
 import br.ufal.ic.myfood.exceptions.Empresas.*;
+import br.ufal.ic.myfood.exceptions.Entregas.*;
+import br.ufal.ic.myfood.exceptions.Usuarios.Entregador.NaoEentregadorValido;
 import br.ufal.ic.myfood.exceptions.Usuarios.Entregador.UsuarioNaoEntregador;
 import br.ufal.ic.myfood.models.DonoEmpresa;
 import br.ufal.ic.myfood.models.Empresa;
@@ -19,6 +22,7 @@ import br.ufal.ic.myfood.models.Produto;
 import br.ufal.ic.myfood.models.Pedido;
 import br.ufal.ic.myfood.models.Mercado;
 import br.ufal.ic.myfood.models.Farmacia;
+import br.ufal.ic.myfood.models.Entrega;
 
 
 import java.beans.XMLDecoder;
@@ -27,7 +31,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.List;
 
 
 public class Facade {
@@ -36,6 +39,7 @@ public class Facade {
     private ControladorDeEmpresa controladorDeEmpresa;
     private ControladorDeProduto controladorDeProduto;
     private ControladorDePedidos controladorDePedidos;
+    private ControladorDeEntregas controladorDeEntregas;
 
     public Facade() {
         carregarDados();
@@ -46,6 +50,9 @@ public class Facade {
         this.controladorDeEmpresa.zerar();
         this.controladorDeProduto.zerar();
         this.controladorDePedidos.zerar();
+        if (this.controladorDeEntregas != null) {
+            this.controladorDeEntregas.zerar();
+        }
     }
 
     public void encerrarSistema() {
@@ -90,6 +97,33 @@ public class Facade {
         }
         Empresa e = this.controladorDeEmpresa.buscarEmpresaPorId(empresa);
         return this.controladorDePedidos.criarPedido(u.getNome(), e.getNome());
+    }
+
+    public int criarEntrega(int pedido, int entregador, String destino) throws Exception {
+        Pedido p = this.controladorDePedidos.buscarPedidoPorId(pedido);
+        if (!p.getEstado().equals("pronto")) {
+            throw new PedidoNaoProntoEntrega();
+        }
+
+        Usuario u = this.controladorUsuarios.buscarUsuarioPorId(entregador);
+        if (!(u instanceof Entregador)) {
+            throw new NaoEentregadorValido();
+        }
+
+        for (Entrega ent : this.controladorDeEntregas.getEntrega().values()) {
+            if (ent.getEntregador() == entregador) {
+                Pedido pedAnterior = this.controladorDePedidos.buscarPedidoPorId(ent.getPedido());
+                if (pedAnterior.getEstado().equals("entregando")) {
+                    throw  new EntregadroEmEntrega();
+                }
+            }
+        }
+
+        String dest = (destino == null) || destino.trim().isEmpty() ? u.getEndereco() : destino;
+        int idEntrega = this.controladorDeEntregas.criarEntrega(p, entregador, dest);
+        p.setEstado("entregando");
+
+        return idEntrega;
     }
 
     public int login(String email, String senha) throws Exception {
@@ -227,6 +261,45 @@ public class Facade {
         return sb.toString();
     }
 
+    public String getEntrega(int id, String atributo) throws Exception {
+        if (atributo == null || atributo.trim().isEmpty()) throw new AtributoInvalido();
+
+        Entrega e = this.controladorDeEntregas.buscarEntregaPorId(id);
+
+        switch (atributo) {
+            case "cliente": return e.getCliente();
+            case "empresa": return e.getEmpresa();
+            case "pedido": return String.valueOf(e.getPedido());
+            case "entregador":
+                return this.controladorUsuarios.buscarUsuarioPorId(e.getEntregador()).getNome();
+            case "destino": return e.getDestino();
+            case "produtos":
+                StringBuilder sb = new StringBuilder("{[");
+                for (int i = 0; i < e.getProdutos().size(); i++) {
+                    sb.append(e.getProdutos().get(i));
+                    if (i < e.getProdutos().size() - 1) sb.append(", ");
+                }
+                sb.append("]}");
+                return sb.toString();
+            default:
+                throw new AtributoNaoExiste();
+        }
+    }
+
+    public int getIdEntrega(int pedido) throws Exception {
+        return this.controladorDeEntregas.getIdEntrega(pedido);
+    }
+
+    public void entregar(int idEntrega) throws Exception {
+        try {
+            Entrega e = this.controladorDeEntregas.buscarEntregaPorId(idEntrega);
+            Pedido p = this.controladorDePedidos.buscarPedidoPorId(e.getPedido());
+            p.setEstado("entregue");
+        } catch (Exception ex) {
+            throw new NaoExisteNadaEntregaID();
+        }
+    }
+
     public String listarProdutos(int empresa) throws Exception {
         try {
             this.controladorDeEmpresa.buscarEmpresaPorId(empresa);
@@ -260,6 +333,51 @@ public class Facade {
         Empresa e = this.controladorDeEmpresa.buscarEmpresaPorId(p.getEmpresa());
 
         this.controladorDePedidos.adicionarProduto(numero, e.getNome(), p.getNome(), p.getValor());
+    }
+
+    public void liberarPedido(int numero) throws Exception {
+        Pedido p = this.controladorDePedidos.buscarPedidoPorId(numero);
+        if (p.getEstado().equals("pronto")) {
+            throw new PedidoJaLiberado();
+        }
+        if (!p.getEstado().equals("preparando")) {
+            throw new ProdutoNaoEstaSendoPreparado();
+        }
+        p.setEstado("pronto");
+    }
+
+    public int obterPedido(int idEntregador) throws Exception {
+        Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idEntregador);
+        if (!(u instanceof Entregador)) {
+            throw new UsuarioNaoEntregador();
+        }
+
+        Entregador ent = (Entregador) u;
+        if (ent.getEmpresas().isEmpty()) {
+            throw new EntregadorEmNenhumaEmpresa();
+        }
+
+        Pedido pedidoFarmacia = null;
+        Pedido pedidoNormal = null;
+
+        for (Pedido p : this.controladorDePedidos.getPedido().values()) {
+            if (p.getEstado().equals("pronto")) {
+                Empresa emp = this.controladorDeEmpresa.buscarEmpresaPorNome(p.getEmpresa());
+
+                if (ent.getEmpresas().contains(emp.getId())) {
+                    if (emp instanceof Farmacia) {
+                        if (pedidoFarmacia == null) pedidoFarmacia = p;
+                    } else {
+                        if (pedidoNormal == null) pedidoNormal = p;
+                    }
+                }
+            }
+        }
+
+        if (pedidoFarmacia != null) return pedidoFarmacia.getNumero();
+        if (pedidoNormal != null) return pedidoNormal.getNumero();
+
+        throw new NaoExistePedidoEntrega();
     }
 
     public void fecharPedido(int numero) throws Exception {
@@ -317,6 +435,7 @@ public class Facade {
             encoder.writeObject(this.controladorDeEmpresa);
             encoder.writeObject(this.controladorDeProduto);
             encoder.writeObject(this.controladorDePedidos);
+            encoder.writeObject(this.controladorDeEntregas);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -328,11 +447,13 @@ public class Facade {
             this.controladorDeEmpresa = (ControladorDeEmpresa) decoder.readObject();
             this.controladorDeProduto = (ControladorDeProduto) decoder.readObject();
             this.controladorDePedidos = (ControladorDePedidos) decoder.readObject();
+            this.controladorDeEntregas = (ControladorDeEntregas) decoder.readObject();
         } catch (Exception e) {
             this.controladorUsuarios = new ControladorDeUsuarios();
             this.controladorDeEmpresa = new ControladorDeEmpresa();
             this.controladorDeProduto = new ControladorDeProduto();
             this.controladorDePedidos = new ControladorDePedidos();
+            this.controladorDeEntregas = new ControladorDeEntregas();
         }
     }
 }

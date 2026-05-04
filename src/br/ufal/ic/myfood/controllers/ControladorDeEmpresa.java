@@ -196,4 +196,13 @@ public class ControladorDeEmpresa {
         m.setAbre(abre);
         m.setFecha(fecha);
     }
+
+    public Empresa buscarEmpresaPorNome(String nome) throws Exception {
+        for (Empresa e : this.empresa.values()) {
+            if (e.getNome().equals(nome)) {
+                return e;
+            }
+        }
+        throw new EmpresaNaoCadastrada();
+    }
 }
