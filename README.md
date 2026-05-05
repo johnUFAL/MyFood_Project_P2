@@ -1,4 +1,7 @@
-**Projeto da disciplina de Programação 2 - Universidade Federal de Alagoas (UFAL)** **Desenvolvedor:** João Victor Duarte do Nascimento
+# MyFood
+
+**Projeto da disciplina de Programação 2 - Universidade Federal de Alagoas (UFAL)**  
+**Desenvolvedor:** João Victor Duarte do Nascimento
 
 ---
 
@@ -29,7 +32,7 @@ O projeto está organizado visando a separação de responsabilidades:
 
 ## Fases de Desenvolvimento
 
-O sistema foi construído em quatro fases incrementais:
+O sistema foi construído de forma incremental ao longo de oito fases:
 
 ### Fase 1 - Usuários
 - Implementação de um `ControladorDeUsuarios` para geração de IDs únicos e validações (CPF, E-mail).
@@ -50,6 +53,25 @@ O sistema foi construído em quatro fases incrementais:
 - Implementação da entidade `Pedido` conectando Cliente, Empresa e Produtos.
 - Fluxo completo gerenciado pelo `ControladorDePedidos`: criar pedido (estado "aberto"), adicionar produtos, remover produtos e fechar pedido (estado "preparando").
 - Cálculos dinâmicos de valor total e validação estrita de estados (ex: não é possível editar pedidos já fechados).
+
+### Fase 5 - Mercados
+- Criação da classe `Mercado`, herdando de `Empresa`, com atributos específicos de horário de funcionamento.
+- Reestruturação das exceções para reaproveitamento de regras de negócio entre Restaurantes e Mercados.
+- Expansão do `ControladorDeEmpresa` e da `Facade` para lidar com múltiplas requisições e lógicas de funcionamento específicas de mercados.
+
+### Fase 6 - Farmácias
+- Introdução da classe `Farmacia`, também herdando de `Empresa`, aproveitando o polimorfismo estabelecido nas fases anteriores.
+- Inclusão do método de criação de farmácia na `Facade`, reutilizando toda a estrutura de métodos e exceções já consolidadas.
+
+### Fase 7 - Entregadores
+- Modelagem da classe `Entregador` (herdeira de `Usuario`), utilizando coleções (`List` e `ArrayList`) para armazenar as empresas vinculadas ao profissional.
+- Atualização do `ControladorDeUsuarios` com novos métodos para criação de entregadores e recuperação de seus atributos específicos.
+- Modificações na `Facade` para permitir o cadastro e o vínculo entre Entregadores e Empresas.
+
+### Fase 8 - Sistema de Entregas
+- Fase mais complexa do projeto, introduzindo a classe abstrata `Entrega` para orquestrar os dados do pedido, entregador, cliente e empresa.
+- Implementação do `ControladorDeEntregas` com métodos focados no ciclo de vida da entrega (`zerar`, `criarEntrega`, `buscarEntregaPorId`, etc.).
+- A `Facade` consolida a lógica final, cruzando dados de todos os controladores para liberar pedidos, calcular prioridades (pedidos de Farmácia têm precedência) e concluir entregas.
 
 ---
 
