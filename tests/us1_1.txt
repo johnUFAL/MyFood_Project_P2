@@ -45,7 +45,7 @@
 # Apaga toda a base de dados.
 zerarSistema
 
-expectError "br.ufal.ic.myfood.models.Usuario nao cadastrado." getAtributoUsuario id=9999 atributo="nome"
+expectError "Usuario nao cadastrado." getAtributoUsuario id=9999 atributo="nome"
 
 criarUsuario nome="Carlos" email="carlos@ufal.com.br" senha="123senha" endereco="Rua Exemplo N 123"
 

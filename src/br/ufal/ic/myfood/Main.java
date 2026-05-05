@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         String[] argsEasyAccept = new String[] {
                 "br.ufal.ic.myfood.Facade",
-                "tests/us8_2.txt",
+                "tests/us7_1.txt",
         };
 
         EasyAccept.main(argsEasyAccept);
