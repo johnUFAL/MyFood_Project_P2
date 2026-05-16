@@ -13,8 +13,6 @@ import br.ufal.ic.myfood.models.Entregador;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
-import java.util.List;
-
 
 public class ControladorDeUsuarios {
     private  Map<Integer, Usuario> usuarios;

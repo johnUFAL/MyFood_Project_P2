@@ -138,4 +138,4 @@ expect "{[[Pastelaria, Rua Segura N 987]]}" getEmpresas entregador=${id3}
 expectError "Usuario nao e um entregador" getEmpresas entregador=${id2}
 
 encerrarSistema
-quit
+

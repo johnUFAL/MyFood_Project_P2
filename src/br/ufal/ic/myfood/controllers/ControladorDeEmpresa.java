@@ -29,21 +29,24 @@ public class ControladorDeEmpresa {
 
     public int gerarId() {return this.proximoId++;}
 
-    public int criarEmpresa(String tipoEmpresa, Usuario dono, String nome, String endereco, String tipoCozinha) throws Exception {
-        if (!(dono instanceof DonoEmpresa)) {
-            throw new UsuarioNaoCriaEmpresa();
-        }
+    private void validarDadosBase(Usuario dono, String nome, String endereco) throws Exception {
+        if (!(dono instanceof DonoEmpresa)) throw new UsuarioNaoCriaEmpresa();
+        if (nome == null || nome.trim().isEmpty()) throw new NomeInvalido();
+        if (endereco == null || endereco.trim().isEmpty()) throw new EnderecoInvalido();
+    }
 
+    private void validarDuplicidade(Usuario dono, String nome, String endereco) throws Exception {
         for (Empresa e : this.empresa.values()) {
             if (e.getNome().equals(nome)) {
-                if (e.getDono() != dono.getId()) {
-                    throw new NomeDeEmpresaExiste();
-                }
-                if (e.getEndereco().equals(endereco)) {
-                    throw new ProibidoMesmoNomeLocal();
-                }
+                if (e.getDono() != dono.getId()) throw new NomeDeEmpresaExiste();
+                if (e.getEndereco().equals(endereco)) throw new ProibidoMesmoNomeLocal();
             }
         }
+    }
+
+    public int criarEmpresa(String tipoEmpresa, Usuario dono, String nome, String endereco, String tipoCozinha) throws Exception {
+        validarDadosBase(dono, nome, endereco);
+        validarDuplicidade(dono, nome, endereco);
 
         int id = gerarId();
 
@@ -52,6 +55,53 @@ public class ControladorDeEmpresa {
             this.empresa.put(id, restaurante);
         }
         return id;
+    }
+
+    public int criarMercado(String tipoEmpresa, Usuario dono, String nome, String endereco, String abre, String fecha, String tipoMercado) throws Exception {
+        if (tipoEmpresa == null || !tipoEmpresa.equals("mercado")) throw new TipoEmpresaInvalido();
+
+        validarDadosBase(dono, nome, endereco);
+
+        Mercado.validarHorario(abre, fecha);
+
+        if (tipoMercado == null || (!tipoMercado.equals("supermercado") && !tipoMercado.equals("minimercado") && !tipoMercado.equals("atacadista"))) {
+            throw new TipoMercadoInvalido();
+        }
+
+        validarDuplicidade(dono, nome, endereco);
+
+        int id = gerarId();
+        Mercado mercado = new Mercado(id, dono.getId(), nome, endereco, abre, fecha, tipoMercado);
+        this.empresa.put(id, mercado);
+        return id;
+    }
+
+    public int criarFarmacia(String tipoEmpresa, Usuario dono, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws Exception {
+        if (tipoEmpresa == null || !tipoEmpresa.equals("farmacia")) {
+            throw new TipoEmpresaInvalido();
+        }
+
+        validarDadosBase(dono, nome, endereco);
+        validarDuplicidade(dono, nome, endereco);
+
+        int id = gerarId();
+        Farmacia farmacia = new Farmacia(id, dono.getId(), nome, endereco, aberto24Horas, numeroFuncionarios);
+        this.empresa.put(id, farmacia);
+        return id;
+    }
+
+    public void alterarFuncionamento(int idMercado, String abre, String fecha) throws Exception {
+        Empresa e = buscarEmpresaPorId(idMercado);
+
+        if (!(e instanceof Mercado)) {
+            throw new NaoMercadoValido();
+        }
+
+        Mercado.validarHorario(abre, fecha);
+
+        Mercado m = (Mercado) e;
+        m.setAbre(abre);
+        m.setFecha(fecha);
     }
 
     public String getEmpresasDoUsuario(int idDono) {
@@ -103,98 +153,6 @@ public class ControladorDeEmpresa {
             throw new EmpresaNaoCadastrada();
         }
         return this.empresa.get(id);
-    }
-
-    public void validarHorario(String abre, String fecha) throws Exception {
-        if (abre == null || fecha == null) {
-            throw new HorarioInvalido();
-        }
-
-        if (abre.length() != 5 || fecha.length() != 5 || abre.charAt(2) != ':' || fecha.charAt(2) != ':'){
-            throw new FormatoHoraInvalido();
-        }
-
-        try {
-            int hAbre = Integer.parseInt(abre.substring(0, 2));
-            int mAbre = Integer.parseInt(abre.substring(3, 5));
-            int hFecha = Integer.parseInt(fecha.substring(0, 2));
-            int mFecha = Integer.parseInt(fecha.substring(3, 5));
-
-            if (hAbre < 0 || hAbre > 23 || mAbre < 0 || mAbre > 59 || hFecha < 0 || hFecha > 23 || mFecha < 0 || mFecha > 59) {
-                throw new HorarioInvalido();
-            }
-
-            if (abre.compareTo(fecha) >= 0) {
-                throw new HorarioInvalido();
-            }
-        } catch (NumberFormatException e) {
-            throw new FormatoHoraInvalido();
-        }
-    }
-
-    private void validarCriacaoEmpresaBase(Usuario dono, String nome, String endereco) throws Exception {
-        if (!(dono instanceof DonoEmpresa)) throw new UsuarioNaoCriaEmpresa();
-        if (nome == null || nome.trim().isEmpty()) throw new NomeInvalido();
-        if (endereco == null || endereco.trim().isEmpty()) throw new EnderecoInvalido();
-
-        for (Empresa e : this.empresa.values()) {
-            if (e.getNome().equals(nome)) {
-                if (e.getDono() != dono.getId()) throw new NomeDeEmpresaExiste();
-                if (e.getEndereco().equals(endereco)) throw new ProibidoMesmoNomeLocal();
-            }
-        }
-    }
-
-    public int criarMercado(String tipoEmpresa, Usuario dono, String nome, String endereco, String abre, String fecha, String tipoMercado) throws Exception {
-        if (tipoEmpresa == null || !tipoEmpresa.equals("mercado")) throw new TipoEmpresaInvalido();
-        if (!(dono instanceof DonoEmpresa)) throw new UsuarioNaoCriaEmpresa();
-        if (nome == null || nome.trim().isEmpty()) throw new NomeInvalido();
-        if (endereco == null || endereco.trim().isEmpty()) throw new EnderecoInvalido();
-
-        validarHorario(abre, fecha);
-
-        if (tipoMercado == null || (!tipoMercado.equals("supermercado") && !tipoMercado.equals("minimercado") && !tipoMercado.equals("atacadista"))) {
-            throw new TipoMercadoInvalido();
-        }
-
-        for (Empresa e : this.empresa.values()) {
-            if (e.getNome().equals(nome)) {
-                if (e.getDono() != dono.getId()) throw new NomeDeEmpresaExiste();
-                if (e.getEndereco().equals(endereco)) throw new ProibidoMesmoNomeLocal();
-            }
-        }
-
-        int id = gerarId();
-        Mercado mercado = new Mercado(id, dono.getId(), nome, endereco, abre, fecha, tipoMercado);
-        this.empresa.put(id, mercado);
-        return id;
-    }
-
-    public int criarFarmacia(String tipoEmpresa, Usuario dono, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws Exception {
-        if (tipoEmpresa == null || !tipoEmpresa.equals("farmacia")) {
-            throw new TipoEmpresaInvalido();
-        }
-
-        validarCriacaoEmpresaBase(dono, nome, endereco);
-
-        int id = gerarId();
-        Farmacia farmacia = new Farmacia(id, dono.getId(), nome, endereco, aberto24Horas, numeroFuncionarios);
-        this.empresa.put(id, farmacia);
-        return id;
-    }
-
-    public void alterarFuncionamento(int idMercado, String abre, String fecha) throws Exception {
-        Empresa e = buscarEmpresaPorId(idMercado);
-
-        if (!(e instanceof Mercado)) {
-            throw new NaoMercadoValido();
-        }
-
-        validarHorario(abre, fecha);
-
-        Mercado m = (Mercado) e;
-        m.setAbre(abre);
-        m.setFecha(fecha);
     }
 
     public Empresa buscarEmpresaPorNome(String nome) throws Exception {

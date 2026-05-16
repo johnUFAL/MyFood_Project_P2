@@ -30,7 +30,7 @@ public class ControladorDeEntregas {
 
     public int gerarId() {return this.proximoId++;}
 
-    public int criarEntrega(Pedido pedido, int idEntregador, String destino) throws Exception {
+    public int criarEntrega(Pedido pedido, int idEntregador, String destino) {
         int id = gerarId();
 
         Entrega novaEntrega = new Entrega(id, pedido.getCliente(), pedido.getEmpresa(), pedido.getNumero(), idEntregador, destino);

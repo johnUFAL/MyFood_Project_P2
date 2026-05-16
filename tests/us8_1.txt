@@ -227,4 +227,3 @@ expectError "Nao existe pedido para entrega" obterPedido entregador=${id3}
 expectError "Nao existe pedido para entrega" obterPedido entregador=${id4}
 
 encerrarSistema
-quit
