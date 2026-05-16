@@ -18,8 +18,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 /**
- * Classe de Fachada (Facade) que centraliza os pontos de entrada do sistema MyFood.
- * Orquestra as interações entre os diferentes controladores de domínio sem gerenciar regras de negócio diretamente.
+ * Ponto de entrada único do sistema MyFood.
+ * Delega as operações aos controladores responsáveis sem conter regras de negócio próprias.
  */
 public class Facade {
 
@@ -30,7 +30,7 @@ public class Facade {
     private ControladorDeEntregas controladorDeEntregas;
 
     /**
-     * Construtor da Facade. Inicializa o sistema carregando os dados persistidos.
+     * Inicializa a Facade carregando os dados salvos em disco, se existirem.
      */
     public Facade() {
         carregarDados();
@@ -41,7 +41,7 @@ public class Facade {
     // =========================================================================
 
     /**
-     * Reseta completamente o estado de todos os controladores do sistema.
+     * Apaga todos os dados do sistema, devolvendo-o ao estado inicial.
      */
     public void zerarSistema() {
         this.controladorUsuarios.zerar();
@@ -54,7 +54,7 @@ public class Facade {
     }
 
     /**
-     * Finaliza a execução do sistema garantindo a persistência correta dos dados em disco.
+     * Persiste os dados em disco e encerra o sistema.
      */
     public void encerrarSistema() {
         salvarDados();
@@ -65,49 +65,49 @@ public class Facade {
     // =========================================================================
 
     /**
-     * Cria um usuário do tipo Cliente.
-     * @param nome Nome do cliente.
-     * @param email E-mail único do cliente.
+     * Cadastra um cliente.
+     * @param nome Nome completo.
+     * @param email E-mail de acesso (deve ser único).
      * @param senha Senha de acesso.
      * @param endereco Endereço de entrega padrão.
-     * @throws Exception Caso os dados sejam inválidos ou o e-mail já esteja em uso.
+     * @throws Exception Se os dados forem inválidos ou o e-mail já estiver em uso.
      */
     public void criarUsuario(String nome, String email, String senha, String endereco) throws Exception {
         this.controladorUsuarios.criarCliente(nome, email, senha, endereco);
     }
 
     /**
-     * Cria um usuário do tipo Dono de Empresa.
-     * @param nome Nome do proprietário.
-     * @param email E-mail único de acesso.
+     * Cadastra um dono de empresa.
+     * @param nome Nome completo.
+     * @param email E-mail de acesso (deve ser único).
      * @param senha Senha de acesso.
-     * @param endereco Endereço residencial/comercial.
+     * @param endereco Endereço do proprietário.
      * @param cpf CPF do proprietário.
-     * @throws Exception Caso os dados base ou o CPF sejam inválidos.
+     * @throws Exception Se os dados forem inválidos ou o CPF já estiver em uso.
      */
     public void criarUsuario(String nome, String email, String senha, String endereco, String cpf) throws Exception {
         this.controladorUsuarios.criarDono(nome, email, senha, endereco, cpf);
     }
 
     /**
-     * Cria um usuário do tipo Entregador.
-     * @param nome Nome do entregador.
-     * @param email E-mail único de acesso.
+     * Cadastra um entregador.
+     * @param nome Nome completo.
+     * @param email E-mail de acesso (deve ser único).
      * @param senha Senha de acesso.
      * @param endereco Endereço do entregador.
-     * @param veiculo Tipo de veículo utilizado.
-     * @param placa Placa de identificação do veículo.
-     * @throws Exception Caso o veículo, a placa ou os dados genéricos sejam inválidos.
+     * @param veiculo Tipo do veículo (ex: moto, bicicleta).
+     * @param placa Placa do veículo.
+     * @throws Exception Se os dados forem inválidos ou a placa já estiver cadastrada.
      */
     public void criarUsuario(String nome, String email, String senha, String endereco, String veiculo, String placa) throws Exception {
         this.controladorUsuarios.criarEntregador(nome, email, senha, endereco, veiculo, placa);
     }
 
     /**
-     * Autentica um usuário no sistema com base nas credenciais informadas.
-     * @param email E-mail registrado.
+     * Autentica um usuário e retorna seu ID.
+     * @param email E-mail cadastrado.
      * @param senha Senha correspondente.
-     * @return O identificador único do usuário logado.
+     * @return ID do usuário autenticado.
      * @throws Exception Se as credenciais estiverem incorretas ou em branco.
      */
     public int login(String email, String senha) throws Exception {
@@ -115,11 +115,11 @@ public class Facade {
     }
 
     /**
-     * Recupera o valor de um determinado atributo de um usuário cadastrado.
-     * @param id Identificador do usuário.
-     * @param atributo Nome do atributo desejado (ex: nome, email, cpf, placa, veiculo).
-     * @return Uma representação em string do valor do atributo solicitado.
-     * @throws Exception Caso o usuário ou o atributo não existam.
+     * Retorna o valor de um atributo de um usuário.
+     * @param id ID do usuário.
+     * @param atributo Nome do atributo (ex: nome, email, cpf, veiculo, placa).
+     * @return Valor do atributo como String.
+     * @throws Exception Se o usuário ou atributo não existirem.
      */
     public String getAtributoUsuario(int id, String atributo) throws Exception {
         return this.controladorUsuarios.getAtributoUsuario(id, atributo);
@@ -130,14 +130,14 @@ public class Facade {
     // =========================================================================
 
     /**
-     * Cadastra uma nova Empresa do tipo Restaurante.
-     * @param tipoEmpresa Tipo da empresa ("restaurante").
-     * @param dono ID do usuário proprietário.
-     * @param nome Nome do estabelecimento.
-     * @param endereco Endereço de localização do restaurante.
-     * @param tipoCozinha Especialidade gastronômica culinária do local.
-     * @return O ID único da empresa gerada.
-     * @throws Exception Se o usuário informado não for um dono corporativo ou se o local já existir.
+     * Cadastra um restaurante.
+     * @param tipoEmpresa Deve ser "restaurante".
+     * @param dono ID do usuário dono.
+     * @param nome Nome do restaurante.
+     * @param endereco Endereço do restaurante.
+     * @param tipoCozinha Tipo de culinária (ex: italiana, japonesa).
+     * @return ID do restaurante criado.
+     * @throws Exception Se o usuário não for dono de empresa ou o restaurante já existir.
      */
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) throws Exception {
         Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
@@ -145,15 +145,15 @@ public class Facade {
     }
 
     /**
-     * Cadastra uma nova Empresa do tipo Mercado.
-     * @param tipoEmpresa Tipo da empresa ("mercado").
-     * @param dono ID do usuário proprietário.
+     * Cadastra um mercado.
+     * @param tipoEmpresa Deve ser "mercado".
+     * @param dono ID do usuário dono.
      * @param nome Nome do mercado.
-     * @param endereco Endereço de localização.
-     * @param abre Horário de abertura (HH:MM).
-     * @param fecha Horário de encerramento das atividades (HH:MM).
-     * @param tipoMercado Segmentação de mercado (supermercado, minimercado, atacadista).
-     * @return O ID único do mercado gerado.
+     * @param endereco Endereço do mercado.
+     * @param abre Horário de abertura no formato HH:MM.
+     * @param fecha Horário de fechamento no formato HH:MM.
+     * @param tipoMercado Segmento do mercado (ex: supermercado, minimercado).
+     * @return ID do mercado criado.
      * @throws Exception Se os horários ou o tipo de mercado forem inválidos.
      */
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String abre, String fecha, String tipoMercado) throws Exception {
@@ -162,15 +162,15 @@ public class Facade {
     }
 
     /**
-     * Cadastra uma nova Empresa do tipo Farmácia.
-     * @param tipoEmpresa Tipo da empresa ("farmacia").
-     * @param dono ID do usuário proprietário.
+     * Cadastra uma farmácia.
+     * @param tipoEmpresa Deve ser "farmacia".
+     * @param dono ID do usuário dono.
      * @param nome Nome da farmácia.
-     * @param endereco Endereço do estabelecimento físico.
-     * @param aberto24Horas Estado indicativo se funciona continuamente.
-     * @param numeroFuncionarios Quantidade total de colaboradores ativos.
-     * @return O ID único da farmácia gerada.
-     * @throws Exception Se os dados corporativos forem inconsistentes.
+     * @param endereco Endereço da farmácia.
+     * @param aberto24Horas Indica se funciona 24 horas.
+     * @param numeroFuncionarios Número de funcionários.
+     * @return ID da farmácia criada.
+     * @throws Exception Se os dados forem inválidos.
      */
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws Exception{
         Usuario usuario = this.controladorUsuarios.buscarUsuarioPorId(dono);
@@ -178,21 +178,21 @@ public class Facade {
     }
 
     /**
-     * Altera os horários padrão de funcionamento de um determinado mercado.
-     * @param mercado ID identificador do mercado alvo.
+     * Altera os horários de funcionamento de um mercado.
+     * @param mercado ID do mercado.
      * @param abre Novo horário de abertura.
      * @param fecha Novo horário de fechamento.
-     * @throws Exception Se os formatos temporais forem inadequados ou se a empresa não for um mercado.
+     * @throws Exception Se os horários forem inválidos ou a empresa não for um mercado.
      */
     public void alterarFuncionamento(int mercado, String abre, String fecha) throws Exception {
         this.controladorDeEmpresa.alterarFuncionamento(mercado, abre, fecha);
     }
 
     /**
-     * Retorna a lista indexada de estabelecimentos comerciais pertencentes a um proprietário.
-     * @param idDono ID do usuário do tipo Proprietário.
-     * @return String formatada contendo a listagem das empresas.
-     * @throws Exception Se o usuário informado não possuir papéis administrativos corporativos.
+     * Retorna a lista de empresas de um dono.
+     * @param idDono ID do usuário dono.
+     * @return String formatada com as empresas do usuário.
+     * @throws Exception Se o usuário não for dono de empresa.
      */
     public String getEmpresasDoUsuario(int idDono) throws Exception {
         Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idDono);
@@ -203,23 +203,25 @@ public class Facade {
     }
 
     /**
-     * Obtém o ID único de uma empresa associada a um proprietário com base no seu nome e índice de aparição.
+     * Retorna o ID de uma empresa pelo nome e posição na lista do dono.
      * @param idDono ID do dono.
      * @param nome Nome da empresa.
-     * @param indice Posição na lista de busca ordenada.
-     * @return ID numérico correspondente da empresa filtrada.
-     * @throws Exception Caso os critérios de filtragem ou índices falhem.
+     * @param indice Posição na lista (começa em 1).
+     * @return ID da empresa.
+     * @throws Exception Se a empresa não for encontrada.
      */
     public int getIdEmpresa(int idDono, String nome, int indice) throws Exception {
         return this.controladorDeEmpresa.getIdEmpresa(idDono, nome, indice);
     }
 
     /**
-     * Recupera o valor textual associado a uma propriedade da empresa informada.
-     * @param idEmpresa ID único da empresa.
-     * @param atributo Nome da propriedade (nome, endereco, tipoCozinha, dono, abre, fecha, tipoMercado, etc.).
-     * @return Valor do atributo solicitado.
-     * @throws Exception Se o atributo for inválido para o tipo específico de estabelecimento.
+     * Retorna o valor de um atributo de uma empresa.
+     * Atributos disponíveis variam por tipo: restaurante (tipoCozinha), mercado (abre, fecha, tipoMercado),
+     * farmácia (aberto24Horas, numeroFuncionarios). Todos aceitam nome, endereco e dono.
+     * @param idEmpresa ID da empresa.
+     * @param atributo Nome do atributo desejado.
+     * @return Valor do atributo como String.
+     * @throws Exception Se o atributo não existir ou não se aplicar ao tipo da empresa.
      */
     public String getAtributoEmpresa(int idEmpresa, String atributo) throws Exception {
         Empresa e = this.controladorDeEmpresa.buscarEmpresaPorId(idEmpresa);
@@ -265,37 +267,37 @@ public class Facade {
     // =========================================================================
 
     /**
-     * Cria um novo produto no cardápio/catálogo de um estabelecimento comercial.
-     * @param empresa ID único da empresa proprietária do produto.
-     * @param nome Nome descritivo do item.
-     * @param valor Preço unitário mercantil.
-     * @param category Classificação de nicho alimentar ou comercial.
-     * @return ID gerado para o produto recém-cadastrado.
-     * @throws Exception Se já houver um produto homônimo na mesma empresa ou se o valor for negativo.
+     * Adiciona um produto ao catálogo de uma empresa.
+     * @param empresa ID da empresa.
+     * @param nome Nome do produto.
+     * @param valor Preço unitário.
+     * @param category Categoria do produto.
+     * @return ID do produto criado.
+     * @throws Exception Se já existir um produto com o mesmo nome na empresa ou o valor for inválido.
      */
     public int criarProduto(int empresa, String nome, float valor, String category) throws Exception {
         return this.controladorDeProduto.criarProduto(empresa, nome, valor, category);
     }
 
     /**
-     * Altera todas as propriedades cadastrais de um produto específico.
-     * @param produto ID numérico do produto.
+     * Atualiza os dados de um produto existente.
+     * @param produto ID do produto.
      * @param nome Novo nome.
-     * @param valor Novo preço ajustado.
+     * @param valor Novo preço.
      * @param categoria Nova categoria.
-     * @throws Exception Caso o produto não seja encontrado ou os novos valores sejam inconsistentes.
+     * @throws Exception Se o produto não for encontrado ou os valores forem inválidos.
      */
     public void editarProduto(int produto, String nome, float valor, String categoria) throws Exception {
         this.controladorDeProduto.editarProduto(produto, nome, valor, categoria);
     }
 
     /**
-     * Obtém uma informação detalhada de um produto com base no nome e ID da empresa detentora.
-     * @param nome Nome exato do produto.
-     * @param empresa ID único da empresa.
-     * @param atributo Nome do campo desejado (valor, categoria, empresa).
-     * @return Valor da propriedade pesquisada.
-     * @throws Exception Se o produto não for localizado.
+     * Retorna um atributo de um produto buscado pelo nome e empresa.
+     * @param nome Nome do produto.
+     * @param empresa ID da empresa.
+     * @param atributo Atributo desejado: valor, categoria ou empresa.
+     * @return Valor do atributo como String.
+     * @throws Exception Se o produto não for encontrado.
      */
     public String getProduto(String nome, int empresa, String atributo) throws Exception {
         Produto p = this.controladorDeProduto.buscarProdutoPorNomeEEmpresa(nome, empresa);
@@ -309,10 +311,10 @@ public class Facade {
     }
 
     /**
-     * Gera uma listagem formatada de todos os produtos ativos de um estabelecimento.
-     * @param empresa ID identificador da empresa.
-     * @return Representação textual estruturada da lista de produtos.
-     * @throws Exception Caso o ID da empresa fornecido seja inválido ou inexistente.
+     * Retorna a lista de produtos de uma empresa.
+     * @param empresa ID da empresa.
+     * @return String formatada com os produtos cadastrados.
+     * @throws Exception Se a empresa não for encontrada.
      */
     public String listarProdutos(int empresa) throws Exception {
         try {
@@ -324,11 +326,11 @@ public class Facade {
     }
 
     /**
-     * Helper privado interno para mapear um produto avaliando o nome do item e o nome corporativo da empresa de origem.
-     * @param nomeProduto Nome do produto a ser pesquisado.
-     * @param nomeEmpresa Nome corporativo da empresa a qual o produto pertence.
-     * @return O objeto Produto correspondente.
-     * @throws Exception Caso o produto não seja encontrado.
+     * Busca um produto pelo nome e pelo nome da empresa a que pertence.
+     * @param nomeProduto Nome do produto.
+     * @param nomeEmpresa Nome da empresa.
+     * @return Objeto Produto encontrado.
+     * @throws Exception Se o produto não for encontrado.
      */
     private Produto buscarProdutoPorNomeENomeDaEmpresa(String nomeProduto, String nomeEmpresa) throws Exception {
         for (Produto p : this.controladorDeProduto.getProduto().values()) {
@@ -347,11 +349,11 @@ public class Facade {
     // =========================================================================
 
     /**
-     * Inicia a abertura de um Pedido de entrega mercantil.
-     * @param cliente ID numérico do usuário solicitante.
-     * @param empresa ID numérico do estabelecimento comercial.
-     * @return O número de rastreio único gerado para o pedido.
-     * @throws Exception Caso o usuário seja um dono de empresa ou se já houver outro pedido em aberto para o mesmo local.
+     * Abre um pedido para um cliente em uma empresa.
+     * @param cliente ID do cliente.
+     * @param empresa ID da empresa.
+     * @return Número do pedido criado.
+     * @throws Exception Se o cliente for dono de empresa ou já tiver um pedido aberto na mesma empresa.
      */
     public int criarPedido(int cliente, int empresa) throws Exception {
         Usuario u = this.controladorUsuarios.buscarUsuarioPorId(cliente);
@@ -363,12 +365,12 @@ public class Facade {
     }
 
     /**
-     * Recupera o número único do pedido baseado nos dados nominais do par envolvido e na ordem cronológica.
-     * @param cliente ID único do cliente.
-     * @param empresa ID único da empresa.
-     * @param indice Posição sequencial do pedido na listagem histórica.
-     * @return O identificador numérico interno correspondente.
-     * @throws Exception Se os parâmetros de busca falharem no mapeamento.
+     * Retorna o número de um pedido pelo cliente, empresa e posição na lista.
+     * @param cliente ID do cliente.
+     * @param empresa ID da empresa.
+     * @param indice Posição na lista (começa em 1).
+     * @return Número do pedido.
+     * @throws Exception Se o pedido não for encontrado.
      */
     public int getNumeroPedido(int cliente, int empresa, int indice) throws Exception {
         Usuario u = this.controladorUsuarios.buscarUsuarioPorId(cliente);
@@ -377,10 +379,10 @@ public class Facade {
     }
 
     /**
-     * Insere uma unidade de um produto ao escopo interno do pedido aberto informado.
-     * @param numero Número único do pedido.
-     * @param produto ID único do produto a ser adicionado.
-     * @throws Exception Caso o pedido esteja fechado ou se o produto pertencer a outra empresa diferente da selecionada no pedido.
+     * Adiciona um produto a um pedido aberto.
+     * @param numero Número do pedido.
+     * @param produto ID do produto.
+     * @throws Exception Se o pedido estiver fechado ou o produto pertencer a outra empresa.
      */
     public void adicionarProduto(int numero, int produto) throws Exception {
         Produto p = this.controladorDeProduto.buscarProdutoPorId(produto);
@@ -389,10 +391,10 @@ public class Facade {
     }
 
     /**
-     * Remove uma unidade de um determinado produto do escopo de um pedido ativo em aberto.
+     * Remove uma unidade de um produto de um pedido aberto.
      * @param pedido Número do pedido.
-     * @param produto Nome descritivo do produto a ser subtraído.
-     * @throws Exception Se o pedido já estiver fechado ou se o item não compor a lista.
+     * @param produto Nome do produto a remover.
+     * @throws Exception Se o pedido estiver fechado ou o produto não estiver no pedido.
      */
     public void removerProduto(int pedido, String produto) throws Exception {
         if (produto == null || produto.trim().isEmpty()) {
@@ -408,18 +410,18 @@ public class Facade {
     }
 
     /**
-     * Altera o estado do pedido fechando-o para edições e movendo-o para a esteira de preparação logística.
-     * @param numero Identificador numérico único do pedido.
-     * @throws Exception Se o pedido não existir ou já estiver encerrado.
+     * Fecha um pedido, impedindo novas edições e iniciando a preparação.
+     * @param numero Número do pedido.
+     * @throws Exception Se o pedido não existir ou já estiver fechado.
      */
     public void fecharPedido(int numero) throws Exception {
         this.controladorDePedidos.fecharPedido(numero);
     }
 
     /**
-     * Altera o status do fluxo do pedido de preparando para pronto para despacho.
-     * @param numero Identificador numérico do pedido.
-     * @throws Exception Se o pedido não estiver em fase de preparação corporativa prévia.
+     * Marca um pedido em preparação como pronto para entrega.
+     * @param numero Número do pedido.
+     * @throws Exception Se o pedido não estiver no estado "preparando".
      */
     public void liberarPedido(int numero) throws Exception {
         Pedido p = this.controladorDePedidos.buscarPedidoPorId(numero);
@@ -433,10 +435,11 @@ public class Facade {
     }
 
     /**
-     * Busca o pedido elegível mais antigo no estado de pronto que pertença à rede de atuação corporativa do entregador logado.
-     * @param idEntregador ID numérico único do entregador.
-     * @return O número identificador do pedido pronto localizado.
-     * @throws Exception Se não houver pedidos disponíveis ou se o entregador não estiver vinculado a nenhuma empresa do MyFood.
+     * Retorna o número do pedido mais antigo no estado "pronto" disponível para o entregador.
+     * Pedidos de farmácia têm prioridade sobre os demais.
+     * @param idEntregador ID do entregador.
+     * @return Número do pedido disponível.
+     * @throws Exception Se não houver pedidos disponíveis ou o entregador não estiver vinculado a nenhuma empresa.
      */
     public int obterPedido(int idEntregador) throws Exception {
         Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idEntregador);
@@ -472,11 +475,11 @@ public class Facade {
     }
 
     /**
-     * Recupera as propriedades inerentes a um pedido processado pelo sistema.
-     * @param numero Código de rastreio numérico do pedido.
-     * @param atributo Campo solicitado (cliente, empresa, estado, produtos, valor).
-     * @return String contendo os dados do atributo.
-     * @throws Exception Caso o campo mapeado não pertença à estrutura mercantil.
+     * Retorna o valor de um atributo de um pedido.
+     * @param numero Número do pedido.
+     * @param atributo Atributo desejado: cliente, empresa, estado, produtos ou valor.
+     * @return Valor do atributo como String.
+     * @throws Exception Se o atributo não existir.
      */
     public String getPedidos(int numero, String atributo) throws Exception {
         if (atributo == null || atributo.trim().isEmpty()) throw new AtributoInvalido();
@@ -506,10 +509,10 @@ public class Facade {
     // =========================================================================
 
     /**
-     * Vincula contratualmente um entregador profissional à malha logística de uma empresa parceira.
-     * @param idEmpresa ID corporativo da empresa.
-     * @param idEntregador ID numérico do entregador.
-     * @throws Exception Se o usuário informado não for habilitado legalmente como entregador no sistema.
+     * Vincula um entregador a uma empresa, permitindo que ele receba pedidos dela.
+     * @param idEmpresa ID da empresa.
+     * @param idEntregador ID do entregador.
+     * @throws Exception Se o usuário não for entregador ou a empresa não existir.
      */
     public void cadastrarEntregador(int idEmpresa, int idEntregador) throws Exception {
         Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idEntregador);
@@ -525,12 +528,13 @@ public class Facade {
     }
 
     /**
-     * Cria um manifesto operacional de Entrega, vinculando o entregador ao pedido e alterando seu status logístico.
-     * @param pedido ID numérico do pedido pronto.
-     * @param entregador ID numérico do entregador encarregado do despacho.
-     * @param destino Endereço físico final detalhado de entrega.
-     * @return O ID único do manifesto de entrega gerado pelo sistema.
-     * @throws Exception Se o entregador estiver em trânsito ativo realizando outra entrega simultaneamente.
+     * Registra uma entrega, associando o entregador ao pedido e marcando-o como "entregando".
+     * Se o destino for vazio, usa o endereço cadastrado do entregador.
+     * @param pedido Número do pedido (deve estar no estado "pronto").
+     * @param entregador ID do entregador.
+     * @param destino Endereço de entrega.
+     * @return ID da entrega criada.
+     * @throws Exception Se o pedido não estiver pronto ou o entregador já tiver uma entrega em andamento.
      */
     public int criarEntrega(int pedido, int entregador, String destino) throws Exception {
         Pedido p = this.controladorDePedidos.buscarPedidoPorId(pedido);
@@ -547,7 +551,7 @@ public class Facade {
             if (ent.getEntregador() == entregador) {
                 Pedido pedAnterior = this.controladorDePedidos.buscarPedidoPorId(ent.getPedido());
                 if (pedAnterior.getEstado().equals("entregando")) {
-                    throw new EntregadroEmEntrega(); // Make sure this exception name is spelled correctly in your project!
+                    throw new EntregadroEmEntrega();
                 }
             }
         }
@@ -560,11 +564,11 @@ public class Facade {
     }
 
     /**
-     * Obtém uma informação mapeada de uma entrega ativa com base no seu manifesto logístico.
-     * @param id Código único da entrega.
-     * @param atributo Atributo pretendido (cliente, empresa, pedido, entregador, destino, produtos).
-     * @return String traduzida do atributo da entrega.
-     * @throws Exception Se os IDs ou propriedades forem inválidos.
+     * Retorna o valor de um atributo de uma entrega.
+     * @param id ID da entrega.
+     * @param atributo Atributo desejado: cliente, empresa, pedido, entregador, destino ou produtos.
+     * @return Valor do atributo como String.
+     * @throws Exception Se o atributo não existir.
      */
     public String getEntrega(int id, String atributo) throws Exception {
         if (atributo == null || atributo.trim().isEmpty()) throw new AtributoInvalido();
@@ -591,19 +595,19 @@ public class Facade {
     }
 
     /**
-     * Puxa o ID único de rastreio logístico da entrega à qual pertence o pedido informado.
-     * @param pedido ID do pedido de entrega.
-     * @return Código numérico identificador único da entrega mapeada.
-     * @throws Exception Se não houver entregas ativas geradas para o pedido informado.
+     * Retorna o ID da entrega associada a um pedido.
+     * @param pedido Número do pedido.
+     * @return ID da entrega.
+     * @throws Exception Se não houver entrega para o pedido informado.
      */
     public int getIdEntrega(int pedido) throws Exception {
         return this.controladorDeEntregas.getIdEntrega(pedido);
     }
 
     /**
-     * Finaliza o fluxo logístico concluindo a entrega com sucesso no endereço de destino, liberando o entregador.
-     * @param idEntrega Identificador numérico do manifesto de entrega.
-     * @throws Exception Se o código de entrega não corresponder a nenhuma operação em trânsito.
+     * Conclui uma entrega, marcando o pedido como "entregue".
+     * @param idEntrega ID da entrega.
+     * @throws Exception Se a entrega não for encontrada.
      */
     public void entregar(int idEntrega) throws Exception {
         try {
@@ -616,10 +620,10 @@ public class Facade {
     }
 
     /**
-     * Lista todos os e-mails corporativos dos entregadores associados a uma determinada empresa do MyFood.
-     * @param idEmpresa ID da empresa parceira.
-     * @return String formatada da lista de e-mails dos funcionários da malha.
-     * @throws Exception Caso o ID da empresa não seja localizado.
+     * Retorna os e-mails dos entregadores vinculados a uma empresa.
+     * @param idEmpresa ID da empresa.
+     * @return String formatada com os e-mails dos entregadores.
+     * @throws Exception Se a empresa não for encontrada.
      */
     public String getEntregadores(int idEmpresa) throws Exception {
         this.controladorDeEmpresa.buscarEmpresaPorId(idEmpresa);
@@ -641,10 +645,10 @@ public class Facade {
     }
 
     /**
-     * Lista todas as empresas e endereços físicos nas quais um entregador profissional possui vínculo operacional de frete.
-     * @param idEntregador ID único do entregador profissional.
-     * @return String contendo os dados estruturados das empresas parceiras.
-     * @throws Exception Se o usuário informado não pertencer à classe de entregadores.
+     * Retorna as empresas às quais um entregador está vinculado, com nome e endereço de cada uma.
+     * @param idEntregador ID do entregador.
+     * @return String formatada com as empresas vinculadas.
+     * @throws Exception Se o usuário não for entregador.
      */
     public String getEmpresas(int idEntregador) throws Exception {
         Usuario u = this.controladorUsuarios.buscarUsuarioPorId(idEntregador);
